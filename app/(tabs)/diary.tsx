@@ -407,12 +407,7 @@ export default function DiaryScreen() {
       <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.topBar}>
         <View>
-          <Image
-            accessibilityLabel="온도일기"
-            resizeMode="contain"
-            source={require("@/assets/images/logo.png")}
-            style={styles.logoImage}
-          />
+          <Text style={styles.logo}>온도일기</Text>
           <Text style={styles.desc}>오늘의 온도를 캘린더에 기록해요</Text>
         </View>
 
@@ -577,12 +572,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 14,
   },
-  logoImage: {
-    width: 150,
-    height: 70,
+  logo: {
+    fontSize: 30,
+    fontWeight: "500",
+    color: COLORS.white,
   },
   desc: {
-    marginTop: 2,
+    marginTop: 6,
     color: COLORS.whiteSoft,
     fontSize: 15,
     lineHeight: 22,
