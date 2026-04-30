@@ -207,43 +207,74 @@ async function createWatermarkedImage(
     context.closePath();
   };
 
-  const padding = Math.max(24, canvas.width * 0.032);
-  const fontSize = Math.max(34, canvas.width * 0.055);
-  context.font = `300 ${fontSize}px "Avenir Next", "Helvetica Neue", Arial, sans-serif`;
+  const brandText = "온도일기";
+  const padding = Math.max(22, canvas.width * 0.028);
+  const tempFontSize = Math.max(28, canvas.width * 0.044);
+  const brandFontSize = Math.max(12, canvas.width * 0.018);
+  context.font = `300 ${tempFontSize}px "Avenir Next", "Helvetica Neue", Arial, sans-serif`;
   context.textBaseline = "top";
 
-  const metrics = context.measureText(temperatureText);
-  const boxWidth = metrics.width + padding * 1.18;
-  const boxHeight = fontSize + padding * 0.66;
-  const radius = Math.max(16, canvas.width * 0.022);
+  const tempMetrics = context.measureText(temperatureText);
+  context.font = `400 ${brandFontSize}px "Avenir Next", "Helvetica Neue", Arial, sans-serif`;
+  const brandMetrics = context.measureText(brandText);
+  const dividerWidth = Math.max(1, canvas.width * 0.0015);
+  const gap = padding * 0.38;
+  const boxWidth =
+    tempMetrics.width + brandMetrics.width + gap * 2 + dividerWidth + padding;
+  const boxHeight = tempFontSize + padding * 0.54;
+  const radius = boxHeight / 2;
   const x = canvas.width - padding - boxWidth;
   const y = canvas.height - padding - boxHeight;
 
   context.save();
   traceRoundedRect(x, y, boxWidth, boxHeight, radius);
-  context.shadowColor = "rgba(0,0,0,0.24)";
-  context.shadowBlur = padding * 0.64;
-  context.shadowOffsetY = padding * 0.2;
-  context.fillStyle = "rgba(255,255,255,0.16)";
+  context.shadowColor = "rgba(0,0,0,0.2)";
+  context.shadowBlur = padding * 0.45;
+  context.shadowOffsetY = padding * 0.14;
+  context.fillStyle = "rgba(20,20,20,0.18)";
   context.fill();
   context.clip();
-  context.filter = `blur(${Math.max(10, canvas.width * 0.012)}px) saturate(1.28)`;
+  context.filter = `blur(${Math.max(7, canvas.width * 0.008)}px) saturate(1.12)`;
   context.drawImage(image, 0, 0);
   context.filter = "none";
-  context.fillStyle = "rgba(255,255,255,0.20)";
+  const glassGradient = context.createLinearGradient(x, y, x, y + boxHeight);
+  glassGradient.addColorStop(0, "rgba(255,255,255,0.18)");
+  glassGradient.addColorStop(1, "rgba(255,255,255,0.08)");
+  context.fillStyle = glassGradient;
   context.fillRect(x, y, boxWidth, boxHeight);
   context.restore();
 
   context.shadowColor = "transparent";
-  context.strokeStyle = "rgba(255,255,255,0.44)";
-  context.lineWidth = Math.max(1, canvas.width * 0.002);
+  context.strokeStyle = "rgba(255,255,255,0.34)";
+  context.lineWidth = Math.max(1, canvas.width * 0.0014);
   traceRoundedRect(x, y, boxWidth, boxHeight, radius);
   context.stroke();
 
+  const textY = y + (boxHeight - tempFontSize) / 2;
+  const tempX = x + padding * 0.5;
   context.fillStyle = "#FFFFFF";
-  context.shadowColor = "rgba(0,0,0,0.24)";
-  context.shadowBlur = padding * 0.18;
-  context.fillText(temperatureText, x + padding * 0.5, y + padding * 0.31);
+  context.font = `300 ${tempFontSize}px "Avenir Next", "Helvetica Neue", Arial, sans-serif`;
+  context.shadowColor = "rgba(0,0,0,0.26)";
+  context.shadowBlur = padding * 0.12;
+  context.fillText(temperatureText, tempX, textY);
+
+  const dividerX = tempX + tempMetrics.width + gap;
+  context.shadowColor = "transparent";
+  context.fillStyle = "rgba(255,255,255,0.34)";
+  context.fillRect(
+    dividerX,
+    y + padding * 0.27,
+    dividerWidth,
+    boxHeight - padding * 0.54,
+  );
+
+  context.font = `400 ${brandFontSize}px "Avenir Next", "Helvetica Neue", Arial, sans-serif`;
+  context.fillStyle = "rgba(255,255,255,0.82)";
+  context.fillText(
+    brandText,
+    dividerX + gap,
+    y + (boxHeight - brandFontSize) / 2 + brandFontSize * 0.05,
+  );
 
   return canvas.toDataURL("image/png");
 }
@@ -478,6 +509,8 @@ export default function HomeScreen() {
 
               <View style={styles.imageTemperatureBadge}>
                 <Text style={styles.imageTemperatureText}>{temperatureText}</Text>
+                <View style={styles.imageTemperatureDivider} />
+                <Text style={styles.imageWatermarkText}>온도일기</Text>
               </View>
             </View>
 
@@ -710,16 +743,18 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 14,
     bottom: 14,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    borderColor: "rgba(255,255,255,0.42)",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(20,20,20,0.18)",
+    borderColor: "rgba(255,255,255,0.34)",
     borderWidth: 1,
-    borderRadius: 14,
-    paddingHorizontal: 13,
-    paddingVertical: 6,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 7 },
+    shadowOpacity: 0.16,
+    shadowRadius: 14,
     elevation: 6,
     ...GLASS_BACKDROP_STYLE,
   },
@@ -730,13 +765,31 @@ const styles = StyleSheet.create({
       ios: "Avenir Next",
       default: "sans-serif",
     }),
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "300",
-    lineHeight: 28,
+    lineHeight: 23,
     letterSpacing: 0,
     textShadowColor: "rgba(0,0,0,0.24)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 5,
+  },
+  imageTemperatureDivider: {
+    width: 1,
+    height: 17,
+    marginHorizontal: 8,
+    backgroundColor: "rgba(255,255,255,0.34)",
+  },
+  imageWatermarkText: {
+    color: "rgba(255,255,255,0.82)",
+    fontFamily: Platform.select({
+      web: '"Avenir Next", "Helvetica Neue", Arial, sans-serif',
+      ios: "Avenir Next",
+      default: "sans-serif",
+    }),
+    fontSize: 11,
+    fontWeight: "400",
+    lineHeight: 14,
+    letterSpacing: 0,
   },
   diaryMemo: {
     marginTop: 12,
