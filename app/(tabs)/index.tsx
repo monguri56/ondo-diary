@@ -422,7 +422,7 @@ export default function HomeScreen() {
         <View style={styles.topBar}>
           <View>
             <Text style={styles.logo}>온도일기</Text>
-            <Text style={styles.desc}>날씨와 옷차림을 사진으로 남겨요</Text>
+            <Text style={styles.desc}>날씨와 옷차림을 기록해요</Text>
           </View>
 
           <Pressable
