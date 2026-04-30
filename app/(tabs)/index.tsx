@@ -35,6 +35,14 @@ const COLORS = {
   pale: "rgba(255,247,237,0.72)",
 };
 
+const GLASS_BACKDROP_STYLE =
+  Platform.OS === "web"
+    ? {
+        backdropFilter: "blur(18px)",
+        WebkitBackdropFilter: "blur(18px)",
+      }
+    : {};
+
 const weatherMap: Record<number, string> = {
   0: "맑음",
   1: "대체로 맑음",
@@ -174,48 +182,68 @@ async function createWatermarkedImage(
 
   context.drawImage(image, 0, 0);
 
-  const padding = Math.max(32, canvas.width * 0.04);
-  const fontSize = Math.max(48, canvas.width * 0.09);
+  const traceRoundedRect = (
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+  ) => {
+    context.beginPath();
+    context.moveTo(x + radius, y);
+    context.lineTo(x + width - radius, y);
+    context.quadraticCurveTo(x + width, y, x + width, y + radius);
+    context.lineTo(x + width, y + height - radius);
+    context.quadraticCurveTo(
+      x + width,
+      y + height,
+      x + width - radius,
+      y + height,
+    );
+    context.lineTo(x + radius, y + height);
+    context.quadraticCurveTo(x, y + height, x, y + height - radius);
+    context.lineTo(x, y + radius);
+    context.quadraticCurveTo(x, y, x + radius, y);
+    context.closePath();
+  };
+
+  const padding = Math.max(24, canvas.width * 0.032);
+  const fontSize = Math.max(34, canvas.width * 0.055);
   context.font = `300 ${fontSize}px "Avenir Next", "Helvetica Neue", Arial, sans-serif`;
   context.textBaseline = "top";
 
   const metrics = context.measureText(temperatureText);
-  const boxWidth = metrics.width + padding * 1.35;
-  const boxHeight = fontSize + padding * 0.78;
-  const radius = Math.max(24, canvas.width * 0.035);
-  const x = padding;
+  const boxWidth = metrics.width + padding * 1.18;
+  const boxHeight = fontSize + padding * 0.66;
+  const radius = Math.max(16, canvas.width * 0.022);
+  const x = canvas.width - padding - boxWidth;
   const y = canvas.height - padding - boxHeight;
 
-  context.shadowColor = "rgba(0,0,0,0.32)";
-  context.shadowBlur = padding * 0.7;
-  context.shadowOffsetY = padding * 0.18;
-  context.fillStyle = "rgba(0,0,0,0.48)";
-  context.beginPath();
-  context.moveTo(x + radius, y);
-  context.lineTo(x + boxWidth - radius, y);
-  context.quadraticCurveTo(x + boxWidth, y, x + boxWidth, y + radius);
-  context.lineTo(x + boxWidth, y + boxHeight - radius);
-  context.quadraticCurveTo(
-    x + boxWidth,
-    y + boxHeight,
-    x + boxWidth - radius,
-    y + boxHeight,
-  );
-  context.lineTo(x + radius, y + boxHeight);
-  context.quadraticCurveTo(x, y + boxHeight, x, y + boxHeight - radius);
-  context.lineTo(x, y + radius);
-  context.quadraticCurveTo(x, y, x + radius, y);
+  context.save();
+  traceRoundedRect(x, y, boxWidth, boxHeight, radius);
+  context.shadowColor = "rgba(0,0,0,0.24)";
+  context.shadowBlur = padding * 0.64;
+  context.shadowOffsetY = padding * 0.2;
+  context.fillStyle = "rgba(255,255,255,0.16)";
   context.fill();
+  context.clip();
+  context.filter = `blur(${Math.max(10, canvas.width * 0.012)}px) saturate(1.28)`;
+  context.drawImage(image, 0, 0);
+  context.filter = "none";
+  context.fillStyle = "rgba(255,255,255,0.20)";
+  context.fillRect(x, y, boxWidth, boxHeight);
+  context.restore();
 
   context.shadowColor = "transparent";
-  context.strokeStyle = "rgba(255,255,255,0.22)";
+  context.strokeStyle = "rgba(255,255,255,0.44)";
   context.lineWidth = Math.max(1, canvas.width * 0.002);
+  traceRoundedRect(x, y, boxWidth, boxHeight, radius);
   context.stroke();
 
   context.fillStyle = "#FFFFFF";
-  context.shadowColor = "rgba(0,0,0,0.28)";
+  context.shadowColor = "rgba(0,0,0,0.24)";
   context.shadowBlur = padding * 0.18;
-  context.fillText(temperatureText, x + padding * 0.58, y + padding * 0.34);
+  context.fillText(temperatureText, x + padding * 0.5, y + padding * 0.31);
 
   return canvas.toDataURL("image/png");
 }
@@ -680,19 +708,20 @@ const styles = StyleSheet.create({
   },
   imageTemperatureBadge: {
     position: "absolute",
-    top: 18,
-    left: 18,
-    backgroundColor: "rgba(0,0,0,0.42)",
-    borderColor: "rgba(255,255,255,0.2)",
+    right: 14,
+    bottom: 14,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderColor: "rgba(255,255,255,0.42)",
     borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 7,
+    borderRadius: 14,
+    paddingHorizontal: 13,
+    paddingVertical: 6,
     shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.26,
-    shadowRadius: 18,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 6,
+    ...GLASS_BACKDROP_STYLE,
   },
   imageTemperatureText: {
     color: COLORS.white,
@@ -701,9 +730,9 @@ const styles = StyleSheet.create({
       ios: "Avenir Next",
       default: "sans-serif",
     }),
-    fontSize: 30,
+    fontSize: 22,
     fontWeight: "300",
-    lineHeight: 38,
+    lineHeight: 28,
     letterSpacing: 0,
     textShadowColor: "rgba(0,0,0,0.24)",
     textShadowOffset: { width: 0, height: 1 },
