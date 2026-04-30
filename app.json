@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ondo-diary",
+    "name": "온도일기",
     "slug": "ondo-diary",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,9 +9,20 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ondodiary.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "현재 날씨를 확인해 오늘의 옷차림 기록에 온도를 함께 저장하기 위해 위치를 사용합니다.",
+        "NSPhotoLibraryUsageDescription": "오늘의 옷차림 사진을 일기에 저장하기 위해 사진 보관함 접근 권한이 필요합니다."
+      }
     },
     "android": {
+      "package": "com.ondodiary.app",
+      "versionCode": 1,
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -27,6 +38,19 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "현재 날씨를 확인해 오늘의 옷차림 기록에 온도를 함께 저장하기 위해 위치를 사용합니다."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "오늘의 옷차림 사진을 일기에 저장하기 위해 사진 보관함 접근 권한이 필요합니다.",
+          "microphonePermission": false
+        }
+      ],
       [
         "expo-splash-screen",
         {
