@@ -4,7 +4,7 @@ import * as Location from 'expo-location';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -70,7 +70,12 @@ export default function RootLayout() {
     return (
       <LinearGradient colors={loadingGradient} style={styles.loadingScreen}>
         <View style={styles.loadingMark}>
-          <Text style={styles.loadingTitle}>온도일기</Text>
+          <Image
+            accessibilityLabel="온도일기"
+            resizeMode="contain"
+            source={require('@/assets/images/logo.png')}
+            style={styles.loadingLogo}
+          />
           <Text style={styles.loadingSubtitle}>오늘의 온도를 기록하는 중</Text>
         </View>
         <View style={styles.loadingTrack}>
@@ -102,11 +107,9 @@ const styles = StyleSheet.create({
   loadingMark: {
     alignItems: 'center',
   },
-  loadingTitle: {
-    color: '#FFFFFF',
-    fontSize: 34,
-    fontWeight: '300',
-    letterSpacing: 0,
+  loadingLogo: {
+    width: 190,
+    height: 88,
   },
   loadingSubtitle: {
     marginTop: 10,
